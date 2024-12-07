@@ -1,38 +1,40 @@
-import express, { urlencoded } from 'express';
+import express from 'express';
+
 import morgan from 'morgan';
+import { PORT } from './config/serverConfig.js';
+
+import apiRouter from './routes/apiRoutes.js'
+
 
 // Create a new express app/server object
 
 const app = express();
+
+console.log(import.meta);
+
+app.set('view engine', 'ejs');
+app.set('views', import.meta.dirname + '/views');
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.text());
 app.use(express.urlencoded());
+app.use('/api', apiRouter); // if the req url starts with /api, use the apiRouter
 
-app.get('/ping' , (req, res) => {
+app.get('/', (req, res) => {
+    res.render('home' , {name: 'Ankit Verma'});
+});
+
+app.get('/ping' ,( req, res) => {
     return res.json({
         message: 'pong'
     });
 });
 
-
-app.post('/hello' ,  (req, res) => {
-    console.log("query params" , req.query);
-    console.log("req body" , req.body)
-    return res.json({
-        message: 'world'
+app.all('*', (req, res) => {
+    return res.status(404).json({
+        message: 'Page not found'
     });
 });
-
-app.get('/tweets/:tweet_id/comments/:comment_id' ,(req, res) => {
-    console.log("params" , req.params)
-    return res.json({
-        message: 'comment'
-    });
-});
-
-
-
-app.listen(3000, () => {
-    console.log('server is running on port 3000');
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
